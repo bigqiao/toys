@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+	echo "<Usage:  $0  FileName IpList...>"
+	exit 0
+fi
+
+trap "kill -9 0; exit 0" INT HUP QUIT TERM EXIT
+
+jumpip=
+jumpport=
+
+longest=0
+
+for((i=2;i<=$#;i++))
+do
+    eval item=\$$i
+    if [ $longest -lt ${#item} ]; then
+        longest=${#item}
+    fi
+done
+
+let longest=longest+1
+
+filename=$1
+
+while [ $# -ge 2 ]
+do
+    ip=$2
+    if [ -n "$jumpip" ] && [ -n "$jumpport" ]; then
+        ssh -C -o ProxyCommand='ssh -p '$jumpport' $(whoami)@'$jumpip' nc %h %p 2' $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n",'$ip',$0)}' &
+    else
+        ssh -C $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n",'$ip',$0)}' &
+    fi
+    shift
+done
+
+
+wait
