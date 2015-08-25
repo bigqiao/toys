@@ -21,17 +21,15 @@ do
     fi
 done
 
-let longest=longest+1
-
 filename=$1
 
 while [ $# -ge 2 ]
 do
     ip=$2
     if [ -n "$jumpip" ] && [ -n "$jumpport" ]; then
-        ssh -C -o ProxyCommand='ssh -p '$jumpport' $(whoami)@'$jumpip' nc %h %p 2' $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n",'$ip',$0)}' &
+        ssh -C -o ProxyCommand='ssh -p '$jumpport' $(whoami)@'$jumpip' nc %h %p 2' $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n","'$ip'",$0)}' &
     else
-        ssh -C $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n",'$ip',$0)}' &
+        ssh -C $(whoami)@$ip 'tail -q -F '$filename|awk '{printf("\033[36m%-'$longest's\033[0m|%s\n","'$ip'",$0)}' &
     fi
     shift
 done
